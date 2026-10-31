@@ -6,8 +6,6 @@ import { supabase, hasSupabase } from '../lib/supabaseClient'
 import { useI18n } from '../lib/i18n'
 import { SetupNotice } from '../components/Guards'
 
-const MEDALS = ['🥇', '🥈', '🥉']
-
 export default function Leaderboard() {
   const { t, locale } = useI18n()
   const { user } = useAuth()
@@ -51,7 +49,7 @@ export default function Leaderboard() {
             <tbody>
               {rows.map((row, index) => (
                 <tr key={row.id} className={user?.id === row.id ? 'me' : ''}>
-                  <td className="lb-place">{MEDALS[index] ?? index + 1}</td>
+                  <td className="lb-place"><span className={`rank-badge ${index < 3 ? `top-${index + 1}` : ''}`}>{index + 1}</span></td>
                   <td>
                     <Link to={`/players/${row.username}`} className="lb-player" title={t('pp.open')}>
                       <span className="avatar sm">{(row.username || '?')[0].toUpperCase()}</span>

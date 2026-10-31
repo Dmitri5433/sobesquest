@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import TerritoryFooter from './TerritoryFooter'
+import { LEVELS } from '../lib/progression'
 
 const COLS = 16
 const ROWS = 10
@@ -20,7 +21,7 @@ const OFFICE_POSITIONS = [
  * Карта-территория игрока: тайлы расчищаются из тумана войны по мере прогресса.
  * @param {number} solvedCount — решено задач
  * @param {object} unlockedLevels — { junior, middle, senior }
- * @param {Array} unlockedCompanies — открытые компании [{ slug, name, emoji, color }]
+ * @param {Array} unlockedCompanies — открытые компании [{ slug, name, color }]
  */
 export default function TerritoryMap({ solvedCount = 0, unlockedLevels, unlockedCompanies = [] }) {
   const total = COLS * ROWS
@@ -54,11 +55,7 @@ export default function TerritoryMap({ solvedCount = 0, unlockedLevels, unlocked
     () =>
       Object.entries(CITY_POSITIONS)
         .filter(([levelId]) => unlockedLevels?.[levelId])
-        .map(([levelId, [r, c]]) => ({
-          r, c,
-          emoji: levelId === 'junior' ? '🏘' : levelId === 'middle' ? '🏙' : '🏰',
-          label: levelId,
-        })),
+        .map(([levelId, [r, c]]) => ({ r, c, label: levelId, color: LEVELS[levelId].color })),
     [unlockedLevels]
   )
 
@@ -86,7 +83,6 @@ export default function TerritoryMap({ solvedCount = 0, unlockedLevels, unlocked
         {revealOrder.map(({ r, c }, index) => {
           const key = `${r}:${c}`
           const revealed = index < revealCount
-          const isLandmark = landmarkSet.has(key)
           return (
             <motion.rect
               key={key}
@@ -107,9 +103,14 @@ export default function TerritoryMap({ solvedCount = 0, unlockedLevels, unlocked
 
         {cities.map((city) => (
           <g key={`city-${city.label}`}>
-            <text x={city.c * TILE + TILE / 2} y={city.r * TILE + TILE / 2 + 7} textAnchor="middle" fontSize="22">
-              {city.emoji}
-            </text>
+            <circle
+              cx={city.c * TILE + TILE / 2}
+              cy={city.r * TILE + TILE / 2}
+              r={9}
+              fill={city.color}
+              stroke="rgba(0,0,0,0.35)"
+              strokeWidth={1}
+            />
             <text
               x={city.c * TILE + TILE / 2}
               y={city.r * TILE + TILE - 2}
@@ -126,11 +127,13 @@ export default function TerritoryMap({ solvedCount = 0, unlockedLevels, unlocked
           <text
             key={`office-${office.slug}`}
             x={office.c * TILE + TILE / 2}
-            y={office.r * TILE + TILE / 2 + 7}
+            y={office.r * TILE + TILE / 2 + 6}
             textAnchor="middle"
-            fontSize="18"
+            fontSize="16"
+            fontWeight="700"
+            fill={office.color}
           >
-            {office.emoji}
+            {(office.name || '?').trim()[0]?.toUpperCase()}
           </text>
         ))}
       </svg>

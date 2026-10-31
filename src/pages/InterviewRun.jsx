@@ -13,6 +13,7 @@ import CodeEditor from '../components/CodeEditor'
 import TestResults from '../components/TestResults'
 import Timer from '../components/Timer'
 import ReviewForm from '../components/ReviewForm'
+import CompanyLogo from '../components/CompanyLogo'
 
 const THEORY_COUNT = 3
 const CODE_SECONDS = 7 * 60
@@ -250,11 +251,9 @@ export default function InterviewRun() {
     <div className="interview-page">
       <div className="interview-head">
         {company ? (
-          <span className="company-logo" style={{ background: `${company.color}22`, color: company.color }}>
-            {company.emoji}
-          </span>
+          <CompanyLogo name={company.name} color={company.color} />
         ) : (
-          <span className="company-logo">{levelInfo.name[0]}</span>
+          <span className="company-logo monogram">{levelInfo.name[0]}</span>
         )}
         <div>
           <h1>{contextName}</h1>

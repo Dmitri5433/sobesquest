@@ -52,8 +52,8 @@ self.onmessage = async (event) => {
   const fakeConsole = {
     log: (...args) => logs.push(args.map(fmt).join(' ')),
     info: (...args) => logs.push(args.map(fmt).join(' ')),
-    warn: (...args) => logs.push('⚠ ' + args.map(fmt).join(' ')),
-    error: (...args) => logs.push('✖ ' + args.map(fmt).join(' ')),
+    warn: (...args) => logs.push('[warn] ' + args.map(fmt).join(' ')),
+    error: (...args) => logs.push('[error] ' + args.map(fmt).join(' ')),
   }
 
   try {

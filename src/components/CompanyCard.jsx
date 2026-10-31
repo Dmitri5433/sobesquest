@@ -3,6 +3,7 @@ import { Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useI18n } from '../lib/i18n'
 import { LEVELS } from '../lib/progression'
+import CompanyLogo from './CompanyLogo'
 
 export default function CompanyCard({ company, unlocked }) {
   const { t } = useI18n()
@@ -16,9 +17,7 @@ export default function CompanyCard({ company, unlocked }) {
       viewport={{ once: true }}
     >
       <Link to={`/companies/${company.slug}`} className="company-link">
-        <span className="company-logo" style={{ background: `${company.color}22`, color: company.color }}>
-          {company.emoji}
-        </span>
+        <CompanyLogo name={company.name} color={company.color} />
         <div className="company-info">
           <div className="company-name">{company.name}</div>
           <div className="company-tagline">{company.tagline}</div>

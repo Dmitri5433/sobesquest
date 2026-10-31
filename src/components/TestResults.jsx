@@ -40,7 +40,8 @@ export default function TestResults({ running, result }) {
         {(result.timedOut || result.error) && <AlertTriangle size={16} />}
         {total > 0 && (
           <strong>
-            {passed === total ? '✔' : '✖'} {t('results.passed', { passed, total })}
+            {passed === total ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+            {t('results.passed', { passed, total })}
           </strong>
         )}
         <span className="results-duration">{result.durationMs} ms</span>

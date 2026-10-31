@@ -54,7 +54,7 @@ export default function CompanyPage() {
       <Link to="/companies" className="back-link"><ArrowLeft size={15} /> {t('company.allCompanies')}</Link>
 
       <div className="company-hero" style={{ '--company-color': company.color }}>
-        <span className="company-logo big">{company.emoji}</span>
+        <CompanyLogo name={company.name} color={company.color} big />
         <div>
           <h1>{company.name}</h1>
           <p className="company-tagline">{company.tagline}</p>

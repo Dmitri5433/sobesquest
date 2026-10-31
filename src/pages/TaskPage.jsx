@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Play, Lightbulb, Eye, EyeOff, Coins, PartyPopper } from 'lucide-react'
+import { ArrowLeft, Play, Lightbulb, Eye, EyeOff, Coins, CheckCircle2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../lib/auth'
 import { supabase, hasSupabase } from '../lib/supabaseClient'
@@ -101,7 +101,7 @@ export default function TaskPage() {
 
       {justSolved && (
         <motion.div className="solve-banner" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-          <PartyPopper size={18} /> {t('task.solveBanner', { xp: task.xp })}
+          <CheckCircle2 size={18} /> {t('task.solveBanner', { xp: task.xp })}
         </motion.div>
       )}
 
@@ -119,7 +119,7 @@ export default function TaskPage() {
             <div className="panel">
               <h3><Lightbulb size={16} /> {t('task.hints')}</h3>
               {task.hints.slice(0, openHints).map((hint, i) => (
-                <p key={i} className="hint-item">💡 {hint}</p>
+                <p key={i} className="hint-item"><Lightbulb size={13} className="hint-icon" /> {hint}</p>
               ))}
               {openHints < task.hints.length && (
                 <button className="btn btn-sm btn-outline" onClick={() => setOpenHints(openHints + 1)}>

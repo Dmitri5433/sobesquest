@@ -38,7 +38,7 @@ export default function ActivityHeatmap({ activeDays }) {
               <motion.span
                 key={key}
                 className={`heatmap-cell ${active ? 'on' : ''} ${future ? 'future' : ''}`}
-                title={`${new Date(`${key}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}${active ? ' 🔥' : ''}`}
+                title={`${new Date(`${key}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}${active ? ' · ' + t('profile.activeToday') : ''}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: Math.min(wi * 0.03, 0.6) }}
