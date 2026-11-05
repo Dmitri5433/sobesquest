@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/', label: 'nav.home', end: true },
   { to: '/tasks', label: 'nav.tasks' },
   { to: '/companies', label: 'nav.companies' },
+  { to: '/weak', label: 'nav.weak' },
   { to: '/forum', label: 'nav.forum' },
   { to: '/leaderboard', label: 'nav.leaderboard' },
   { to: '/profile', label: 'nav.profile' },

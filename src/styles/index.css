@@ -774,6 +774,29 @@ textarea.input { resize: vertical; }
 
 .profile-joined { color: var(--text-dim); font-size: 0.85rem; }
 
+/* ---------- Достижения ---------- */
+.ach-panel { margin-bottom: 18px; }
+.ach-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.ach-card {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center; padding: 14px 8px; border-radius: 12px;
+  font-size: 0.74rem; color: var(--text-dim);
+  background: var(--panel); border: 1px solid var(--border);
+}
+.ach-card.achieved {
+  color: var(--text);
+  border-color: rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.07);
+}
+.ach-card.achieved svg { color: var(--accent); }
+.ach-card.locked { opacity: 0.55; }
+.ach-card.locked svg { color: rgba(255, 255, 255, 0.25); }
+
+/* ---------- Повторение ---------- */
+.weak-hint { color: var(--text-dim); font-size: 0.9rem; }
+.weak-topics { margin-top: 6px; }
+.topics-list { padding-left: 20px; color: var(--text-dim); display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+
 /* ---------- Форум и обсуждения ---------- */
 .discussion-panel { margin-top: 22px; max-width: 900px; }
 .discussion { display: flex; flex-direction: column; gap: 16px; }

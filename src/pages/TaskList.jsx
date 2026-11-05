@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, Lock, Coins } from 'lucide-react'
 import { useAuth } from '../lib/auth'
@@ -6,6 +6,7 @@ import { supabase, hasSupabase } from '../lib/supabaseClient'
 import { buildProgress, LEVEL_IDS, LEVELS } from '../lib/progression'
 import { useI18n } from '../lib/i18n'
 import { SetupNotice } from '../components/Guards'
+import ErrorPanel from '../components/ErrorPanel'
 
 export default function TaskList() {
   const { t } = useI18n()
@@ -15,8 +16,9 @@ export default function TaskList() {
   const [searchParams] = useSearchParams()
   const activeLevel = searchParams.get('level')
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!hasSupabase) return
+    setError(null)
     supabase
       .from('tasks')
       .select('*')
@@ -28,13 +30,15 @@ export default function TaskList() {
       })
   }, [])
 
+  useEffect(load, [load])
+
   const progress = useMemo(
     () => (tasks ? buildProgress(tasks, solvedIds) : null),
     [tasks, solvedIds]
   )
 
   if (!hasSupabase) return <SetupNotice />
-  if (error) return <div className="setup-notice"><h2>{t('tasks.loadError')}</h2><p>{error}</p></div>
+  if (error) return <ErrorPanel message={error} onRetry={load} />
   if (!progress) return <div className="page-loading"><span className="spinner" /> {t('tasks.loading')}</div>
 
   return (

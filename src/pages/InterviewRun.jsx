@@ -350,6 +350,23 @@ export default function InterviewRun() {
             </div>
           </div>
 
+          {(() => {
+            const weak = [
+              ...theoryQs.map((q, i) => ({ q: q.question, s: theoryScores[i] })),
+              ...hrQs.map((q, i) => ({ q: q.question, s: hrScores[i] })),
+            ].filter((x) => x.s < 2)
+            if (weak.length === 0) return null
+            return (
+              <div className="panel weak-topics">
+                <h3>{t('report.topicsTitle')}</h3>
+                <ul className="topics-list">
+                  {weak.map((w) => <li key={w.q}>{w.q}</li>)}
+                </ul>
+                <Link to="/weak" className="btn btn-outline btn-sm">{t('report.topicsCta')}</Link>
+              </div>
+            )
+          })()}
+
           {savedRun && <div className="saved-note">{t('interview.saved')}</div>}
 
           {companySlug && user && (

@@ -5,22 +5,31 @@ import { useAuth } from '../lib/auth'
 import { supabase, hasSupabase } from '../lib/supabaseClient'
 import { useI18n } from '../lib/i18n'
 import { SetupNotice } from '../components/Guards'
+import ErrorPanel from '../components/ErrorPanel'
 
 export default function Leaderboard() {
   const { t, locale } = useI18n()
   const { user } = useAuth()
   const [rows, setRows] = useState(null)
+  const [error, setError] = useState(null)
 
-  useEffect(() => {
+  const load = () => {
     if (!hasSupabase) return
+    setError(null)
     supabase
       .from('leaderboard')
       .select('*')
       .limit(50)
-      .then(({ data }) => setRows(data || []))
-  }, [])
+      .then(({ data, error: dbError }) => {
+        if (dbError) setError(dbError.message)
+        else setRows(data || [])
+      })
+  }
+
+  useEffect(load, [])
 
   if (!hasSupabase) return <SetupNotice />
+  if (error) return <ErrorPanel message={error} onRetry={load} />
   if (rows === null) {
     return <div className="page-loading"><span className="spinner" /> {t('lb.loading')}</div>
   }

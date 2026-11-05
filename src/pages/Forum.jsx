@@ -5,14 +5,16 @@ import { supabase, hasSupabase } from '../lib/supabaseClient'
 import { useI18n } from '../lib/i18n'
 import { LEVELS } from '../lib/progression'
 import { SetupNotice } from '../components/Guards'
+import ErrorPanel from '../components/ErrorPanel'
 
 export default function Forum() {
   const { t, locale } = useI18n()
   const [comments, setComments] = useState(null)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
+  const load = () => {
     if (!hasSupabase) return
+    setError(null)
     supabase
       .from('comments')
       .select('id, created_at, task_id, tasks(id, title, level)')
@@ -22,7 +24,9 @@ export default function Forum() {
         if (dbError) setError(dbError.message)
         else setComments(data || [])
       })
-  }, [])
+  }
+
+  useEffect(load, [])
 
   const threads = useMemo(() => {
     if (!comments) return null
@@ -40,7 +44,7 @@ export default function Forum() {
   }, [comments])
 
   if (!hasSupabase) return <SetupNotice />
-  if (error) return <div className="setup-notice"><h2>{t('forum.loadError')}</h2><p>{error}</p></div>
+  if (error) return <ErrorPanel message={error} onRetry={load} />
   if (threads === null) return <div className="page-loading"><span className="spinner" /> {t('forum.loading')}</div>
 
   return (

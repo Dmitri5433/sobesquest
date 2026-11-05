@@ -5,6 +5,7 @@ import { buildProgress } from '../lib/progression'
 import { useI18n } from '../lib/i18n'
 import { fallbackCompanies } from '../data/fallback'
 import CompanyCard from '../components/CompanyCard'
+import ErrorPanel from '../components/ErrorPanel'
 
 export default function Companies() {
   const { t } = useI18n()
@@ -12,13 +13,15 @@ export default function Companies() {
   const [companies, setCompanies] = useState(hasSupabase ? null : fallbackCompanies)
   const [tasks, setTasks] = useState(null)
 
-  useEffect(() => {
+  const load = () => {
     if (!hasSupabase) return
     supabase.from('companies').select('*').order('sort_order').then(({ data }) =>
       setCompanies(data?.length ? data : fallbackCompanies)
     )
     supabase.from('tasks').select('*').eq('is_published', true).then(({ data }) => setTasks(data || []))
-  }, [])
+  }
+
+  useEffect(load, [])
 
   const progress = useMemo(
     () => (tasks ? buildProgress(tasks, solvedIds) : null),

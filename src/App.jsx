@@ -15,6 +15,7 @@ import Leaderboard from './pages/Leaderboard'
 import PublicProfile from './pages/PublicProfile'
 import Stats from './pages/Stats'
 import Forum from './pages/Forum'
+import WeakDrill from './pages/WeakDrill'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Admin from './pages/Admin'
@@ -45,6 +46,7 @@ export default function App() {
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/players/:username" element={<PublicProfile />} />
               <Route path="/forum" element={<Forum />} />
+              <Route path="/weak" element={<RequireAuth><WeakDrill /></RequireAuth>} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />

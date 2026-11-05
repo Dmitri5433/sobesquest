@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Coins, Trophy, MapPin, CheckCircle2, Briefcase, Flame, CalendarCheck } from 'lucide-react'
+import {
+  Coins, Trophy, MapPin, CheckCircle2, Briefcase, Flame, CalendarCheck,
+  Zap, Layers, Target, Crown, ClipboardCheck, MessagesSquare,
+} from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { supabase, hasSupabase } from '../lib/supabaseClient'
 import { buildProgress, LEVELS } from '../lib/progression'
@@ -17,6 +20,8 @@ export default function Profile() {
   const [companies, setCompanies] = useState(hasSupabase ? [] : fallbackCompanies)
   const [lbRow, setLbRow] = useState(null)
   const [activityDays, setActivityDays] = useState(() => new Set())
+  const [runScores, setRunScores] = useState([])
+  const [commentsCount, setCommentsCount] = useState(0)
 
   useEffect(() => {
     if (!hasSupabase || !user) return
@@ -26,6 +31,8 @@ export default function Profile() {
     supabase.from('activity_days').select('day').eq('user_id', user.id).then(({ data }) => {
       setActivityDays(new Set((data || []).map((row) => row.day)))
     })
+    supabase.from('interview_runs').select('score').eq('user_id', user.id).then(({ data }) => setRunScores((data || []).map((r) => r.score)))
+    supabase.from('comments').select('id').eq('user_id', user.id).then(({ data }) => setCommentsCount((data || []).length))
   }, [user?.id])
 
   const progress = useMemo(
@@ -37,6 +44,24 @@ export default function Profile() {
     [companies, progress]
   )
   const streak = useMemo(() => computeStreaks([...activityDays]), [activityDays])
+  const bestScore = runScores.length ? Math.max(...runScores) : 0
+
+  const achievements = useMemo(() => {
+    if (!progress) return []
+    return [
+      { key: 'ach.first', ok: progress.solvedTotal >= 1, Icon: Zap },
+      { key: 'ach.five', ok: progress.solvedTotal >= 5, Icon: Layers },
+      { key: 'ach.ten', ok: progress.solvedTotal >= 10, Icon: Target },
+      { key: 'ach.junior', ok: progress.unlocked.middle, Icon: CheckCircle2 },
+      { key: 'ach.middle', ok: progress.unlocked.senior, Icon: MapPin },
+      { key: 'ach.senior', ok: progress.unlocked.senior && progress.isLevelCompleted('senior'), Icon: Crown },
+      { key: 'ach.streak3', ok: streak.best >= 3, Icon: Flame },
+      { key: 'ach.streak7', ok: streak.best >= 7, Icon: Flame },
+      { key: 'ach.interview', ok: runScores.length >= 1, Icon: ClipboardCheck },
+      { key: 'ach.score70', ok: bestScore >= 70, Icon: Trophy },
+      { key: 'ach.forum', ok: commentsCount >= 1, Icon: MessagesSquare },
+    ]
+  }, [progress, streak, runScores, bestScore, commentsCount])
 
   if (!progress) {
     return <div className="page-loading"><span className="spinner" /> {t('profile.loading')}</div>
@@ -100,6 +125,18 @@ export default function Profile() {
           unlockedLevels={progress.unlocked}
           unlockedCompanies={unlockedCompanies}
         />
+      </div>
+
+      <div className="panel ach-panel">
+        <h3><Trophy size={16} /> {t('ach.title')}</h3>
+        <div className="ach-grid">
+          {achievements.map(({ key, ok, Icon }) => (
+            <div key={key} className={`ach-card ${ok ? 'achieved' : 'locked'}`}>
+              <Icon size={20} />
+              <span>{t(key)}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="profile-levels">

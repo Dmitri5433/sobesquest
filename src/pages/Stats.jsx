@@ -3,28 +3,37 @@ import { useAuth } from '../lib/auth'
 import { supabase, hasSupabase } from '../lib/supabaseClient'
 import { buildProgress, LEVELS } from '../lib/progression'
 import { useI18n } from '../lib/i18n'
+import ErrorPanel from '../components/ErrorPanel'
 
 export default function Stats() {
   const { t, locale } = useI18n()
   const { user, solvedIds } = useAuth()
   const [runs, setRuns] = useState(null)
   const [tasks, setTasks] = useState(null)
+  const [error, setError] = useState(null)
 
-  useEffect(() => {
+  const load = () => {
     if (!hasSupabase || !user) return
+    setError(null)
     supabase
       .from('interview_runs')
       .select('*')
       .order('created_at', { ascending: false })
-      .then(({ data }) => setRuns(data || []))
+      .then(({ data, error: dbError }) => {
+        if (dbError) setError(dbError.message)
+        else setRuns(data || [])
+      })
     supabase.from('tasks').select('*').eq('is_published', true).then(({ data }) => setTasks(data || []))
-  }, [user?.id])
+  }
+
+  useEffect(load, [user?.id])
 
   const progress = useMemo(
     () => (tasks ? buildProgress(tasks, solvedIds) : null),
     [tasks, solvedIds]
   )
 
+  if (error) return <ErrorPanel message={error} onRetry={load} />
   if (!progress || runs === null) {
     return <div className="page-loading"><span className="spinner" /> {t('loading')}</div>
   }
