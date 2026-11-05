@@ -68,6 +68,8 @@ export default function TaskPage() {
       functionName: task.function_name,
       tests: task.tests,
       testCode: task.test_code,
+      taskType: task.task_type || 'js',
+      setupSql: task.setup_sql,
     })
     setResult(res)
     setRunning(false)
@@ -141,7 +143,7 @@ export default function TaskPage() {
                 </p>
               ) : (
                 <>
-                  <CodeEditor value={task.solution_code} onChange={() => {}} height="auto" readOnly />
+                  <CodeEditor value={task.solution_code} onChange={() => {}} height="auto" readOnly language={task.task_type === 'sql' ? 'sql' : 'js'} />
                   <button className="btn btn-sm btn-ghost" onClick={() => setShowSolution(false)}>
                     <EyeOff size={14} /> {t('task.hide')}
                   </button>
@@ -154,12 +156,12 @@ export default function TaskPage() {
         <div className="task-code-col">
           <div className="panel editor-panel">
             <div className="editor-head">
-              <span>solution.js · {t('task.draftSaved')}</span>
+              <span>{task.task_type === 'sql' ? 'query.sql' : 'solution.js'} · {t('task.draftSaved')}</span>
               <button className="btn btn-primary btn-run" onClick={run} disabled={running}>
                 <Play size={15} /> {running ? t('task.running') : t('task.run')}
               </button>
             </div>
-            <CodeEditor value={code} onChange={setDraft} />
+            <CodeEditor value={code} onChange={setDraft} language={task.task_type === 'sql' ? 'sql' : 'js'} />
           </div>
           <TestResults running={running} result={result} />
           {allPassed && !alreadySolved && !user && (

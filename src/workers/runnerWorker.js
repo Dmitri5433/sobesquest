@@ -1,4 +1,5 @@
 // Выполняется внутри Web Worker (инлайнится сборкой Vite через ?worker&inline)
+import initSqlJs from 'sql.js'
 
 const fmt = (value) => {
   if (typeof value === 'string') return value
@@ -47,13 +48,46 @@ const assert = {
 }
 
 self.onmessage = async (event) => {
-  const { code, functionName, tests, testCode } = event.data
+  const { code, functionName, tests, testCode, taskType, setupSql, wasmUrl } = event.data
   const logs = []
   const fakeConsole = {
     log: (...args) => logs.push(args.map(fmt).join(' ')),
     info: (...args) => logs.push(args.map(fmt).join(' ')),
     warn: (...args) => logs.push('[warn] ' + args.map(fmt).join(' ')),
     error: (...args) => logs.push('[error] ' + args.map(fmt).join(' ')),
+  }
+
+  // ---------- SQL-задачи: sql.js в воркере ----------
+  if (taskType === 'sql') {
+    try {
+      const SQL = await initSqlJs({ locateFile: () => wasmUrl })
+      const db = new SQL.Database()
+      if (setupSql) db.exec(setupSql)
+      const results = []
+      for (const test of tests || []) {
+        try {
+          const res = db.exec(test.query)
+          const rows = res.length ? res[0].values : []
+          results.push({
+            pass: deepEqual(rows, test.expected),
+            args: test.query,
+            expected: test.expected,
+            actual: rows,
+          })
+        } catch (err) {
+          results.push({
+            pass: false,
+            args: test.query,
+            expected: test.expected,
+            error: err?.message || String(err),
+          })
+        }
+      }
+      self.postMessage({ results, logs, error: null })
+    } catch (err) {
+      self.postMessage({ results: [], logs, error: err?.message || String(err) })
+    }
+    return
   }
 
   try {

@@ -77,6 +77,7 @@ vercel --prod
 
 ```
 supabase/migrations/     SQL: схема, сид-контент, форум (выполняются в Supabase SQL Editor)
+- **SQL-задачи** — решаются прямо в браузере через sql.js (SQLite / WASM)
 src/
   i18n/                  словари интерфейса (ru.js, en.js)
   data/                  демо-задача и резервный каталог компаний

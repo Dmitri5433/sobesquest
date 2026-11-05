@@ -12,6 +12,8 @@ const EMPTY_TASK = {
   description: '',
   starter_code: '',
   function_name: '',
+  task_type: 'js',
+  setup_sql: '',
   tests_text: '[\n  { "args": [1, 2], "expected": 3 }\n]',
   test_code: '',
   hints_text: '',
@@ -27,7 +29,9 @@ function taskToForm(task) {
     title: task.title,
     description: task.description,
     starter_code: task.starter_code || '',
-    function_name: task.function_name,
+    function_name: task.function_name || '',
+    task_type: task.task_type || 'js',
+    setup_sql: task.setup_sql || '',
     tests_text: JSON.stringify(task.tests ?? [], null, 2),
     test_code: task.test_code || '',
     hints_text: (task.hints || []).join('\n'),
@@ -42,9 +46,16 @@ function formToTaskPayload(form) {
   if (form.tests_text.trim()) {
     tests = JSON.parse(form.tests_text)
     if (!Array.isArray(tests)) throw new Error('not-array')
-    for (const test of tests) {
-      if (!Array.isArray(test.args)) throw new Error('args')
-      if (!('expected' in test)) throw new Error('expected')
+    if (form.task_type === 'sql') {
+      for (const test of tests) {
+        if (!test.query) throw new Error('query')
+        if (!('expected' in test)) throw new Error('expected')
+      }
+    } else {
+      for (const test of tests) {
+        if (!Array.isArray(test.args)) throw new Error('args')
+        if (!('expected' in test)) throw new Error('expected')
+      }
     }
   }
   return {
@@ -52,9 +63,11 @@ function formToTaskPayload(form) {
     title: form.title.trim(),
     description: form.description.trim(),
     starter_code: form.starter_code,
-    function_name: form.function_name.trim(),
+    function_name: form.task_type === 'js' ? form.function_name.trim() : '',
+    task_type: form.task_type,
+    setup_sql: form.task_type === 'sql' ? form.setup_sql.trim() : null,
     tests,
-    test_code: form.test_code.trim() || null,
+    test_code: form.task_type === 'js' ? (form.test_code.trim() || null) : null,
     hints: form.hints_text.split('\n').map((s) => s.trim()).filter(Boolean),
     solution_code: form.solution_code.trim() || null,
     xp: Number(form.xp) || 10,
@@ -68,6 +81,7 @@ function TaskForm({ initial, onCancel, onSaved }) {
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
+  const isSql = form.task_type === 'sql'
 
   const submit = async (e) => {
     e.preventDefault()
@@ -80,7 +94,8 @@ function TaskForm({ initial, onCancel, onSaved }) {
       return
     }
     if (!payload.title) return setError(t('admin.errTitle'))
-    if (!payload.function_name) return setError(t('admin.errFn'))
+    if (payload.task_type === 'js' && !payload.function_name) return setError(t('admin.errFn'))
+    if (payload.task_type === 'sql' && !payload.setup_sql) return setError(t('admin.errSetup'))
 
     setBusy(true)
     const query = initial.id
@@ -99,6 +114,13 @@ function TaskForm({ initial, onCancel, onSaved }) {
           <span>{t('admin.level')}</span>
           <select className="input" value={form.level} onChange={set('level')}>
             {LEVEL_OPTIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
+        </label>
+        <label className="field">
+          <span>{t('admin.taskType')}</span>
+          <select className="input" value={form.task_type} onChange={set('task_type')}>
+            <option value="js">JavaScript</option>
+            <option value="sql">SQL</option>
           </select>
         </label>
         <label className="field grow">
@@ -121,14 +143,23 @@ function TaskForm({ initial, onCancel, onSaved }) {
       </label>
 
       <div className="form-row">
-        <label className="field">
-          <span>{t('admin.fnName')}</span>
-          <input className="input" value={form.function_name} onChange={set('function_name')} placeholder="sum" />
-        </label>
-        <label className="field grow">
-          <span>{t('admin.hintsLabel')}</span>
-          <input className="input" value={form.hints_text} onChange={set('hints_text')} placeholder={t('admin.hintsPh')} />
-        </label>
+        {isSql ? (
+          <label className="field grow">
+            <span>{t('admin.setupSql')}</span>
+            <textarea className="input mono" rows={4} value={form.setup_sql} onChange={set('setup_sql')} />
+          </label>
+        ) : (
+          <>
+            <label className="field">
+              <span>{t('admin.fnName')}</span>
+              <input className="input" value={form.function_name} onChange={set('function_name')} placeholder="sum" />
+            </label>
+            <label className="field grow">
+              <span>{t('admin.hintsLabel')}</span>
+              <input className="input" value={form.hints_text} onChange={set('hints_text')} placeholder={t('admin.hintsPh')} />
+            </label>
+          </>
+        )}
       </div>
 
       <label className="field">
@@ -136,15 +167,23 @@ function TaskForm({ initial, onCancel, onSaved }) {
         <textarea className="input mono" rows={4} value={form.starter_code} onChange={set('starter_code')} />
       </label>
 
-      <label className="field">
-        <span>{t('admin.tests')}</span>
-        <textarea className="input mono" rows={6} value={form.tests_text} onChange={set('tests_text')} />
-      </label>
-
-      <label className="field">
-        <span>{t('admin.testCode')}</span>
-        <textarea className="input mono" rows={5} value={form.test_code} onChange={set('test_code')} />
-      </label>
+      {isSql ? (
+        <label className="field">
+          <span>{t('admin.testsSql')}</span>
+          <textarea className="input mono" rows={6} value={form.tests_text} onChange={set('tests_text')} />
+        </label>
+      ) : (
+        <>
+          <label className="field">
+            <span>{t('admin.tests')}</span>
+            <textarea className="input mono" rows={6} value={form.tests_text} onChange={set('tests_text')} />
+          </label>
+          <label className="field">
+            <span>{t('admin.testCode')}</span>
+            <textarea className="input mono" rows={5} value={form.test_code} onChange={set('test_code')} />
+          </label>
+        </>
+      )}
 
       <label className="field">
         <span>{t('admin.solution')}</span>

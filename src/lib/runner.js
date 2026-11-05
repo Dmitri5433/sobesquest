@@ -41,6 +41,9 @@ export function runTests(payload, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
         timedOut: false,
       })
 
-    worker.postMessage(payload)
+    worker.postMessage({
+      ...payload,
+      wasmUrl: new URL('sql-wasm.wasm', window.location.origin).href,
+    })
   })
 }

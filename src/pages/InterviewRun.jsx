@@ -45,6 +45,8 @@ function CodeStage({ task, onFinish }) {
       functionName: task.function_name,
       tests: task.tests,
       testCode: task.test_code,
+      taskType: task.task_type || 'js',
+      setupSql: task.setup_sql,
     })
     setResult(res)
     setRunning(false)
@@ -72,12 +74,12 @@ function CodeStage({ task, onFinish }) {
       <p className="code-stage-desc">{task.description}</p>
       <div className="panel editor-panel">
         <div className="editor-head">
-          <span>solution.js</span>
+          <span>{task.task_type === 'sql' ? 'query.sql' : 'solution.js'}</span>
           <button className="btn btn-primary btn-sm" onClick={run} disabled={running}>
             <Play size={14} /> {running ? t('task.running') : t('task.run')}
           </button>
         </div>
-        <CodeEditor value={code} onChange={setDraft} height="240px" />
+        <CodeEditor value={code} onChange={setDraft} height="240px" language={task.task_type === 'sql' ? 'sql' : 'js'} />
       </div>
       <TestResults running={running} result={result} />
       <button className="btn btn-primary btn-lg finish-btn" onClick={finish} disabled={finishing}>
