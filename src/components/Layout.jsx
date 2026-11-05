@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Swords, Menu, X, LogOut, ShieldCheck } from 'lucide-react'
+import { Swords, Menu, X, LogOut, ShieldCheck, Sun, Moon } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { useI18n } from '../lib/i18n'
 
@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 
 export default function Layout({ children }) {
   const { user, profile, isAdmin, signOut, hasSupabase } = useAuth()
-  const { t, lang, setLang } = useI18n()
+  const { t, lang, setLang, theme, setTheme } = useI18n()
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -65,6 +65,14 @@ export default function Layout({ children }) {
           </nav>
 
           <div className="topbar-right">
+            <button
+              className="theme-toggle"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              aria-label="Theme"
+              title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <div className="lang-switch" role="group" aria-label="Language">
               <button className={lang === 'ru' ? 'active' : ''} onClick={() => setLang('ru')}>RU</button>
               <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
